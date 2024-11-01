@@ -1,0 +1,36 @@
+{
+    "name": "martinpl/blade-directives-nesting",
+    "homepage": "https://github.com/martinpl/blade-directives-nesting",
+    "autoload": {
+        "psr-4": {
+            "MartinPL\\BladeDirectivesNesting\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Marcin Panniak",
+            "email": "martinplr@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "MartinPL\\BladeDirectivesNesting\\PackageServiceProvider"
+            ]
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.4",
+        "illuminate/support": "^11.29",
+        "orchestra/testbench": "^9.5",
+        "laravel/pint": "^1.18"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit tests"
+    }
+}
