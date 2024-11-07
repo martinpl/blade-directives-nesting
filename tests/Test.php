@@ -43,10 +43,10 @@ class Test extends \Tests\TestCase
         $this->assertEquals('<div left="attribute">content</div> ', $output);
     }
 
-    public function testDirectiveFalsePositive()
+    public function testMultipleDirectivesInOnTag()
     {
-        $output = Blade::render('<div data-email="example@exampe.com"></div>');
-        $this->assertEquals('<div data-email="example@exampe.com"></div>', $output);
+        $output = Blade::render('<div @foreach([0, 1] as $index) attribute="center" @if($loop->index == 1)>Hello @if($loop->index == 1){{ $loop->index }}@endif</div>');
+        $this->assertEquals('<div attribute="center">Hello 1</div>  ', $output);
     }
 }
 

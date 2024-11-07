@@ -4,8 +4,6 @@ namespace MartinPL\BladeDirectivesNesting;
 
 class Preprocessor
 {
-    private const directivePattern = '/(?<!\S)@(\w+)\s*(\([^)]*\))?/';
-
     public function __construct(private string $template) {}
 
     public function handle(): string
@@ -44,7 +42,7 @@ class Preprocessor
             if ($tag->isClosing()) {
                 for ($i = count($structure) - 1; $i >= 0; $i--) {
                     if ($tag->name() == $structure[$i]['tag']) {
-                        $this->wrapContentTag($structure[$i], $end);
+                        $this->wrapPairedTag($structure[$i], $end);
                         array_splice($structure, $i);
                         break;
                     }
@@ -65,28 +63,21 @@ class Preprocessor
 
     private function wrapSelfClosingTag(Tag $tag, int $start, int $end): void
     {
-        if (preg_match(self::directivePattern, $tag, $matches)) {
-            $directive = $matches[0];
-            $directiveName = $matches[1];
-            $cleanTag = str_replace(' '.$directive, '', $tag);
-            $wrappedTag = "{$directive}{$cleanTag}@end{$directiveName} ";
-
-            $this->template = substr_replace($this->template, $wrappedTag, $start, $end - $start + 1);
+        $wrapper = new Wrapper($tag);
+        if ($wrapper->hasDirectives()) {
+            $wrapped = $wrapper->wrapSelfClosingTag();
+            $this->template = substr_replace($this->template, $wrapped, $start, $end - $start + 1);
         }
     }
 
-    private function wrapContentTag(array $structure, int $end): void
+    private function wrapPairedTag(array $structure, int $end): void
     {
         $openingTag = substr($this->template, $structure['start'], $structure['content'] - $structure['start']);
-        if (preg_match(self::directivePattern, $openingTag, $matches)) {
-            $directive = $matches[0];
-            $directiveName = $matches[1];
+        $wrapper = new Wrapper($openingTag);
+        if ($wrapper->hasDirectives()) {
             $content = substr($this->template, $structure['start'], $end - $structure['start'] + 1);
-            $cleanOpeningTag = str_replace(' '.$directive, '', $openingTag);
-            $cleanContent = str_replace($openingTag, $cleanOpeningTag, $content);
-            $wrappedTag = "{$directive}{$cleanContent}@end{$directiveName} ";
-
-            $this->template = substr_replace($this->template, $wrappedTag, $structure['start'], $end - $structure['start'] + 1);
+            $wrapped = $wrapper->wrapPairedTag($content);
+            $this->template = substr_replace($this->template, $wrapped, $structure['start'], $end - $structure['start'] + 1);
         }
     }
 }
