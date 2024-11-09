@@ -38,9 +38,9 @@ class Wrapper
 
     protected function addStart($tag)
     {
-        $directivesWithSpaceOnStart = array_map(fn ($xd) => ' '.$xd, $this->directives);
+        $directivesWithSpaceOnStart = array_map(fn ($directive) => ' '.$directive, $this->directives);
         $cleanTag = str_replace($directivesWithSpaceOnStart, '', $tag);
-        $directivesAsString = implode(' ', $this->directives);
+        $directivesAsString = implode(' ', array_map(fn ($directive) => '@'.trim($directive, '#'), $this->directives));
 
         return "{$directivesAsString}{$cleanTag}";
     }
@@ -60,7 +60,7 @@ class Wrapper
         $directive = [];
         $directiveName = [];
 
-        preg_match_all('/\B@(@?\w+(?:::\w+)?)([ \t]*)(\( ( [\S\s]*? ) \))?/x', $template, $matches);
+        preg_match_all('/\B\#(\#?\w+(?:::\w+)?)([ \t]*)(\( ( [\S\s]*? ) \))?/x', $template, $matches);
         for ($i = 0; isset($matches[0][$i]); $i++) {
             $match = [
                 $matches[0][$i],
@@ -104,6 +104,7 @@ class Wrapper
      */
     protected function hasEvenNumberOfParentheses(string $expression): bool
     {
+        $expression = trim($expression, '#');
         $tokens = token_get_all('<?php '.$expression);
 
         if (Arr::last($tokens) !== ')') {
