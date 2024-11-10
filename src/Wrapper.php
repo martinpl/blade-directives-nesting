@@ -60,7 +60,7 @@ class Wrapper
         $directive = [];
         $directiveName = [];
 
-        preg_match_all('/\B\#(\#?\w+(?:::\w+)?)([ \t]*)(\( ( [\S\s]*? ) \))?/x', $template, $matches);
+        preg_match_all('/(?:^|\s)\#(\#?\w+(?:::\w+)?)([ \t]*)(\( ( [\S\s]*? ) \))?/x', $template, $matches);
         for ($i = 0; isset($matches[0][$i]); $i++) {
             $match = [
                 $matches[0][$i],
@@ -92,7 +92,7 @@ class Wrapper
                 $match[4] = $match[4].$rest;
             }
 
-            $directive[] = $match[0];
+            $directive[] = trim($match[0]);
             $directiveName[] = $match[1];
         }
 
@@ -104,7 +104,7 @@ class Wrapper
      */
     protected function hasEvenNumberOfParentheses(string $expression): bool
     {
-        $expression = trim($expression, '#');
+        $expression = trim($expression, ' #');
         $tokens = token_get_all('<?php '.$expression);
 
         if (Arr::last($tokens) !== ')') {

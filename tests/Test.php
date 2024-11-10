@@ -48,6 +48,12 @@ class Test extends \Tests\TestCase
         $output = Blade::render('<div #foreach([0, 1] as $index) attribute="center" #if($loop->index == 1)>Hello @if($loop->index == 1){{ $loop->index }}@endif</div>');
         $this->assertEquals('<div attribute="center">Hello 1</div>  ', $output);
     }
+
+    public function testDirectiveFalsePositive()
+    {
+        $output = Blade::render('<div class="selection:bg-[#FF2D20]"></div>');
+        $this->assertEquals('<div class="selection:bg-[#FF2D20]"></div>', $output);
+    }
 }
 
 class Component extends \Illuminate\View\Component
