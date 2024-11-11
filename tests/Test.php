@@ -54,6 +54,12 @@ class Test extends \Tests\TestCase
         $output = Blade::render('<div class="selection:bg-[#FF2D20]"></div>');
         $this->assertEquals('<div class="selection:bg-[#FF2D20]"></div>', $output);
     }
+
+    public function testVoidElement()
+    {
+        $output = Blade::render('<INPUT #foreach([2, 3] as $index) id="id-{{ $index }}">');
+        $this->assertEquals('<INPUT id="id-2"><INPUT id="id-3"> ', $output);
+    }
 }
 
 class Component extends \Illuminate\View\Component

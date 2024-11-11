@@ -4,16 +4,26 @@ namespace MartinPL\BladeDirectivesNesting;
 
 class Tag
 {
-    public function __construct(public string $tag) {}
+    private $name;
+
+    /**
+     * @see https://developer.mozilla.org/en-US/docs/Glossary/Void_element
+     */
+    private $voidElements = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+
+    public function __construct(public string $tag)
+    {
+        $this->name = strtolower(trim(strtok($this->tag, ' '), '</>'));
+    }
 
     public function name(): string
     {
-        return trim(strtok($this->tag, ' '), '</>');
+        return $this->name;
     }
 
     public function isSelfClosing(): bool
     {
-        return substr($this->tag, -2) == '/>';
+        return substr($this->tag, -2) == '/>' || in_array($this->name, $this->voidElements);
     }
 
     public function isClosing(): bool
