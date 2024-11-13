@@ -60,6 +60,32 @@ class Test extends \Tests\TestCase
         $output = Blade::render('<INPUT #foreach([2, 3] as $index) id="id-{{ $index }}">');
         $this->assertEquals('<INPUT id="id-2"><INPUT id="id-3"> ', $output);
     }
+
+    public function testExtendingLength()
+    {
+        $output = Blade::render('
+            <body #if(false)>
+                <div #if(true)>
+                    <div #if(true)>
+                        <div #if(true)>
+                            <div #if(true)>
+                                <div #if(true)>
+                                    <div #if(true)>
+                                        <div #if(true)>
+                                            <div #if(true)>
+                                                <div #if(true)></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </body>
+        ');
+        $this->assertEquals('', $output);
+    }
 }
 
 class Component extends \Illuminate\View\Component

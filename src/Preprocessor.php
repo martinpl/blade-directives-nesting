@@ -35,6 +35,7 @@ class Preprocessor
             if ($tag->isSelfClosing()) {
                 $this->wrapSelfClosingTag($tag, $start, $end);
                 $position = $contentPosition;
+                $length = strlen($this->template);
 
                 continue;
             }
@@ -43,6 +44,7 @@ class Preprocessor
                 for ($i = count($structure) - 1; $i >= 0; $i--) {
                     if ($tag->name() == $structure[$i]['tag']) {
                         $this->wrapPairedTag($structure[$i], $end);
+                        $length = strlen($this->template);
                         array_splice($structure, $i);
                         break;
                     }
