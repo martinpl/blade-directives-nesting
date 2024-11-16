@@ -4,14 +4,9 @@ namespace MartinPL\BladeDirectivesNesting;
 
 class Tag
 {
-    private $name;
+    protected $name;
 
-    /**
-     * @see https://developer.mozilla.org/en-US/docs/Glossary/Void_element
-     */
-    private $voidElements = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
-
-    public function __construct(public string $tag)
+    public function __construct(public string $tag, public int $start, public int $end)
     {
         $this->name = strtolower(trim(strtok($this->tag, ' '), '</>'));
     }
@@ -23,7 +18,12 @@ class Tag
 
     public function isSelfClosing(): bool
     {
-        return substr($this->tag, -2) == '/>' || in_array($this->name, $this->voidElements);
+        /**
+         * @see https://developer.mozilla.org/en-US/docs/Glossary/Void_element
+         */
+        $voidElements = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+
+        return substr($this->tag, -2) == '/>' || in_array($this->name, $voidElements);
     }
 
     public function isClosing(): bool
@@ -34,6 +34,11 @@ class Tag
     public function hasFalseEnding(): bool
     {
         return substr($this->tag, -2) == '->';
+    }
+
+    public function ending(): int
+    {
+        return $this->end + 1;
     }
 
     public function __toString(): string

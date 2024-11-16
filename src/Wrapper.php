@@ -7,11 +7,11 @@ use Illuminate\Support\Str;
 
 class Wrapper
 {
-    private $directives;
+    protected $directives;
 
-    private $directivesNames;
+    protected $directivesNames;
 
-    public function __construct(private string $tag)
+    public function __construct(protected string $tag)
     {
         [$this->directives, $this->directivesNames] = $this->directives($tag);
     }
@@ -55,7 +55,7 @@ class Wrapper
     /**
      * @source https://github.com/illuminate/view/blob/11.x/Compilers/BladeCompiler.php - compileStatements()
      */
-    private function directives($template): array
+    protected function directives($template): array
     {
         $directive = [];
         $directiveName = [];

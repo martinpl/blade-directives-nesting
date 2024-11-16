@@ -10,76 +10,76 @@ class Preprocessor
     {
         $position = 0;
         $length = strlen($this->template);
-        $structure = [];
+        $openingTags = [];
 
         while ($position < $length) {
-            $start = strpos($this->template, '<', $position);
-            if ($start === false) {
+            $tag = $this->findNextTag($position);
+            if (! $tag) {
                 break;
-            }
-
-            $end = strpos($this->template, '>', $start);
-            if ($end === false) {
-                break;
-            }
-
-            $contentPosition = $end + 1;
-            $tag = new Tag(substr($this->template, $start, $contentPosition - $start));
-
-            while ($tag->hasFalseEnding()) {
-                $end = strpos($this->template, '>', $contentPosition);
-                $contentPosition = $end + 1;
-                $tag = new Tag(substr($this->template, $start, $end + 1 - $start));
             }
 
             if ($tag->isSelfClosing()) {
-                $this->wrapSelfClosingTag($tag, $start, $end);
-                $position = $contentPosition;
+                $this->wrapSelfClosingTag($tag);
+                $position = $tag->ending();
                 $length = strlen($this->template);
 
                 continue;
             }
 
             if ($tag->isClosing()) {
-                for ($i = count($structure) - 1; $i >= 0; $i--) {
-                    if ($tag->name() == $structure[$i]['tag']) {
-                        $this->wrapPairedTag($structure[$i], $end);
+                for ($i = count($openingTags) - 1; $i >= 0; $i--) {
+                    if ($tag->name() == $openingTags[$i]->name()) {
+                        $this->wrapPairedTag($openingTags[$i], $tag);
                         $length = strlen($this->template);
-                        array_splice($structure, $i);
+                        array_splice($openingTags, $i);
                         break;
                     }
                 }
             } else {
-                $structure[] = [
-                    'tag' => $tag->name(),
-                    'start' => $start,
-                    'content' => $contentPosition,
-                ];
+                $openingTags[] = $tag;
             }
 
-            $position = $contentPosition;
+            $position = $tag->ending();
         }
 
         return $this->template;
     }
 
-    private function wrapSelfClosingTag(Tag $tag, int $start, int $end): void
+    protected function findNextTag(int $position): ?Tag
+    {
+        $start = strpos($this->template, '<', $position);
+        $end = strpos($this->template, '>', $start);
+        if ($start === false || $end === false) {
+            return null;
+        }
+
+        $contentPosition = $end + 1;
+        $tag = new Tag(substr($this->template, $start, $contentPosition - $start), $start, $end);
+        while ($tag->hasFalseEnding()) {
+            $end = strpos($this->template, '>', $contentPosition);
+            $contentPosition = $end + 1;
+            $tag = new Tag(substr($this->template, $start, $end + 1 - $start), $start, $end);
+        }
+
+        return $tag;
+    }
+
+    protected function wrapSelfClosingTag(Tag $tag): void
     {
         $wrapper = new Wrapper($tag);
         if ($wrapper->hasDirectives()) {
             $wrapped = $wrapper->wrapSelfClosingTag();
-            $this->template = substr_replace($this->template, $wrapped, $start, $end - $start + 1);
+            $this->template = substr_replace($this->template, $wrapped, $tag->start, $tag->end - $tag->start + 1);
         }
     }
 
-    private function wrapPairedTag(array $structure, int $end): void
+    protected function wrapPairedTag(Tag $openingTag, Tag $closingTag): void
     {
-        $openingTag = substr($this->template, $structure['start'], $structure['content'] - $structure['start']);
         $wrapper = new Wrapper($openingTag);
         if ($wrapper->hasDirectives()) {
-            $content = substr($this->template, $structure['start'], $end - $structure['start'] + 1);
+            $content = substr($this->template, $openingTag->start, $closingTag->end - $openingTag->start + 1);
             $wrapped = $wrapper->wrapPairedTag($content);
-            $this->template = substr_replace($this->template, $wrapped, $structure['start'], $end - $structure['start'] + 1);
+            $this->template = substr_replace($this->template, $wrapped, $openingTag->start, $closingTag->end - $openingTag->start + 1);
         }
     }
 }
