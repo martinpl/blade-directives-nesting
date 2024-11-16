@@ -49,6 +49,12 @@ class Test extends \Tests\TestCase
         $this->assertEquals('<div attribute="center">Hello 1</div>  ', $output);
     }
 
+    public function testFalseEndingInfinityLoop()
+    {
+        $output = Blade::render('<div #if (!$test->test->isNotEmpty())></div>', ['test' => (object) ['test' => collect()]]);
+        $this->assertEquals('<div></div> ', $output);
+    }
+
     public function testDirectiveFalsePositive()
     {
         $output = Blade::render('<div class="selection:bg-[#FF2D20]"></div>');
